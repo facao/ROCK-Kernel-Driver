@@ -44,13 +44,19 @@ enabled in the BIOS.
 The following is a reference hardware configuration that was used for
 testing purposes:
 
-<add dGPU config>
-
+APU Config:
 * APU:            AMD A10-7850K APU
 * Motherboard:    ASUS A88X-PRO motherboard (ATX form factor)
 * Memory:         G.SKILL Ripjaws X Series 16GB (2 x 8GB) 240-Pin DDR3 SDRAM DDR3 2133
 * OS:             Ubuntu 14.04 64-bit edition
 * No discrete GPU present in the system
+
+dGPU Config:
+* CPU:            Intel i7-4790
+* Motherboard:    ASUS Z97-PRO
+* Memory:         G.Skill Ripjaws 4 32GB RAM (4 x 8GB)
+* OS:             Ubuntu 14.04.03 64-bit edition
+* dGPU:           ASUS R9 Nano
 
 #### Installing and configuring the kernel
 
@@ -69,20 +75,16 @@ KERNEL=="kfd", MODE="0666", Or you could use the following command:
 `sudo dpkg -i packages/ubuntu/*.deb`
 
 * For Fedora, install the kernel and libhsakmt packages using:
-TODO
+`sudo rpm -i packages/fedora/*.rpm`
 
 * Reboot the system to install the new kernel and enable the HSA kernel driver:  
 `sudo reboot`
 
 
-#####Obtaining kernel and libhsakmt source code
+##### Obtaining kernel and libhsakmt source code
 
 * Source code used to build the kernel is in this repo. Source code to
   build libhsakmt is in the ROCT-Thunk repository 
-
-#####Obtaining firmware binary files
-
-* Firmware binary files are included in compute-firmware_1.0-6b7b341_all.deb
 
 ###LICENSE
 

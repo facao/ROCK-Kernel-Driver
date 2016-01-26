@@ -1,57 +1,98 @@
-### HSA Runtime API and runtime for Boltzmann
+### AMD Radeon OpenCompute Kernel driver
 
-This repository includes the user-mode API interfaces and libraries necessary for host applications to launch compute kernels to available HSA Boltzmann kernel agents. Currently supported agents include only the AMD/ATI Fiji family of discreet GPUs. Reference source code for the core runtime is also available.
+### BINARY PACKAGES FOR KERNEL AND THUNK ARE IN THE /packages DIRECTORY
 
-#### Initial Target Platform Requirements
+### Installation and Configuration guide
 
-* CPU: Intell Haswell or Newer, Core i5, Core i7, Xeon E3 v4 & v5; Xeon E5 v3
-* GPU: Fiji ASIC (AMD R9 Nano, R9 Fury and R9 Fury X)
+#### What's New in this tree ?
 
-#### Source code
+* dGPU support for Tonga and Fiji
+* device and host memory support
+* multiple GPU support
+* host memory allocations are shared between GPUs
 
-The HSA core runtime source code for Boltzmann is located in the src subdirectory. Please consult the associated README.md file for contents and build instructions.
+#### Known issues in this tree
 
-#### Binaries for Ubuntu
+* Segfault on GPU access to unmapped memory not implemented on dGPU
 
-The ubuntu subdirectory contains the hsa-runtime-bltz-1.0.0-Linux.deb debian package. This file contains the following:
+#### Package Contents
 
-* HSA, libHSAIL and interal include files to support application development on the HSA runtime for Boltzmann
-* A 64-bit version of HSA core runtime for Boltzmann
-* A 64-bit version of HSA finalizer extension for Boltzmann
-* A 64-bit version of AMD's runtime tools library
+The /packages contains subfolders with packages for Ubuntu and Fedora
 
-To install the package execute the following command:
+* A bash script which checks if kfd is installed correctly
 
-	`dpkg -i hsa-runtime-bltz-1.0.0-Linux.deb`
+The kernel image is built from a source tree based on the 4.1 upstream
+release plus :
 
-The contents are installed in /opt/bltz by default.
- 
-#### Infrastructure
+* Features in the HSA kernel driver ("amdkfd") that are not yet 
+  upstreamed to the mainline Linux kernel.
+* Changes in the AMDGPU kernel driver ("amdgpu") that may not yet be 
+  upstreamed to the mainline Linux kernel.
 
-The HSA runtime is a thin, user-mode API that exposes the necessary interfaces to access and interact with graphics hardware driven by the AMDGPU driver set and the Boltzmann HSA kernel driver. Together they enable programmers to directly harness the power of AMD discrete graphics devices by allowing host applications to launch compute kernels directly to the graphics hardware.
+##### Note regarding libhsakmt compatibility
+Please note that the libhsakmt library in this repository is NOT compatible 
+with amdkfd that is distributed as part of the mainline Linux kernel 
+from 3.19 and onward.
 
-The capabilities expressed by the HSA Runtime API are:
+#### Target Platform
 
-* Error handling
-* Runtime initialization and shutdown
-* System and agent information
-* Signals and synchronization
-* Architected dispatch
-* Memory management
-* HSA runtime fits into a typical software architecture stack.
+This release is intended for use with any hardware configuration that
+contains only a Kaveri or Carrizo APU, or configurations which contain
+an Intel CPU plus Tonga or Fiji dGPUs. Most testing has been on Fiji.
 
-The HSA runtime provides direct access to the graphics hardware to give the programmer more control of the execution. Some examples of low level hardware access  is  the support of one or more user mode queues provides programmers with a low-latency kernel dispatch interface, allowing them to develop customized dispatch algorithms specific to their application.
+APU motherboards must support run latest BIOS version and have the IOMMU
+enabled in the BIOS.
 
-The HSA Architected Queuing Language is an open standard, defined by the HSA Foundation, specifying the packet syntax used to control supported AMD/ATI Radeon. graphics devices. The AQL language supports several packet types, including packets that can command the hardware to automatically resolve inter-packet dependencies (barrier AND & barrier OR packet), kernel dispatch packets and agent dispatch packets.
+The following is a reference hardware configuration that was used for
+testing purposes:
 
-In addition to user mode queues and AQL, the HSA runtime exposes various virtual address ranges that can be accessed by one or more of the system's graphics devices, and possibly the host. The exposed virtual address ranges either support a fine grained or a coarse grained access. Updates to memory in a fine grained region are immediately visible to all devices that can access it, but only one device can have access to a coarse grained allocation at a time. Ownership of a coarse grained region can be changed using the HSA runtime memory APIs, but this transfer of ownership must be explicitly done by the host application.
+<add dGPU config>
 
-Programmers should consult the HSA Runtime Programmer's Reference Manual for a full description of the HSA Runtime APIs, AQL and the HSA memory policy.
+* APU:            AMD A10-7850K APU
+* Motherboard:    ASUS A88X-PRO motherboard (ATX form factor)
+* Memory:         G.SKILL Ripjaws X Series 16GB (2 x 8GB) 240-Pin DDR3 SDRAM DDR3 2133
+* OS:             Ubuntu 14.04 64-bit edition
+* No discrete GPU present in the system
 
-#### Disclaimer
+#### Installing and configuring the kernel
 
-The information contained herein is for informational purposes only, and is subject to change without notice. While every precaution has been taken in the preparation of this document, it may contain technical inaccuracies, omissions and typographical errors, and AMD is under no obligation to update or otherwise correct this information. Advanced Micro Devices, Inc. makes no representations or warranties with respect to the accuracy or completeness of the contents of this document, and assumes no liability of any kind, including the implied warranties of noninfringement, merchantability or fitness for particular purposes, with respect to the operation or use of AMD hardware, software or other products described herein. No license, including implied or arising by estoppel, to any intellectual property rights is granted by this document. Terms and limitations applicable to the purchase or use of AMD's products are as set forth in a signed agreement between the parties or in AMD's Standard Terms and Conditions of Sale.
+* Downloading the kernel binaries from the repo  
+`git clone https://github.com/RadeonOpenCompute/ROCK-Kernel-Driver.git`
 
-AMD, the AMD Arrow logo, and combinations thereof are trademarks of Advanced Micro Devices, Inc. Other product names used in this publication are for identification purposes only and may be trademarks of their respective companies.
+* Go to the top of the repo:  
+`cd ROCK-Kernel-Driver`
 
-Copyright (c) 2014-2015 Advanced Micro Devices, Inc. All rights reserved.
+* Configure udev to allow any user to access /dev/kfd. As root, use a text
+editor to create /etc/udev/rules.d/kfd.rules containing one line:
+KERNEL=="kfd", MODE="0666", Or you could use the following command:  
+`echo  "KERNEL==\"kfd\", MODE=\"0666\"" | sudo tee /etc/udev/rules.d/kfd.rules`
+
+* For Ubuntu, install the kernel and libhsakmt packages using:  
+`sudo dpkg -i ubuntu/*.deb`
+
+* For Fedora, install the kernel and libhsakmt packages using:
+TODO
+
+* Reboot the system to install the new kernel and enable the HSA kernel driver:  
+`sudo reboot`
+
+* Check the HSA driver installation:
+`cd HSA-Drivers-Linux-AMD; ./kfd_check_installation.sh`
+
+
+#####Obtaining kernel and libhsakmt source code
+
+* Source code used to build the kernel is in this repo. Source code to
+  build libhsakmt is in the ROCT-Thunk repository 
+
+#####Obtaining firmware binary files
+
+* Firmware binary files are included in compute-firmware_1.0-6b7b341_all.deb
+
+###LICENSE
+
+The following lists the different licenses that apply to the different
+components in this repository:
+
+* the Linux kernel images are covered by the modified GPL license in COPYING
+* the firmware image is covered by the license in LICENSE.ucode

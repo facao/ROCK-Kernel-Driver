@@ -1,12 +1,12 @@
 ### AMD Radeon OpenCompute Kernel driver
 
-* Please see /packages directory for binary install packages
+* Please see packages/ folder for binary install packages
 
 ### Installation and Configuration guide
 
 #### What's New in this tree ?
 
-* dGPU support for Tonga and Fiji
+* dGPU support for Fiji
 * device and host memory support
 * multiple GPU support
 * host memory allocations are shared between GPUs
@@ -17,9 +17,7 @@
 
 #### Package Contents
 
-The /packages contains subfolders with packages for Ubuntu and Fedora
-
-* A bash script which checks if kfd is installed correctly
+The packages/ folder contains packages for Ubuntu 14.04 and Fedora 22
 
 The kernel image is built from a source tree based on the 4.1 upstream
 release plus :
@@ -38,7 +36,7 @@ from 3.19 and onward.
 
 This release is intended for use with any hardware configuration that
 contains only a Kaveri or Carrizo APU, or configurations which contain
-an Intel CPU plus Tonga or Fiji dGPUs. Most testing has been on Fiji.
+an Intel Haswell or newer CPU plus Fiji dGPUs. 
 
 APU motherboards must support run latest BIOS version and have the IOMMU
 enabled in the BIOS.
@@ -68,16 +66,13 @@ KERNEL=="kfd", MODE="0666", Or you could use the following command:
 `echo  "KERNEL==\"kfd\", MODE=\"0666\"" | sudo tee /etc/udev/rules.d/kfd.rules`
 
 * For Ubuntu, install the kernel and libhsakmt packages using:  
-`sudo dpkg -i ubuntu/*.deb`
+`sudo dpkg -i packages/ubuntu/*.deb`
 
 * For Fedora, install the kernel and libhsakmt packages using:
 TODO
 
 * Reboot the system to install the new kernel and enable the HSA kernel driver:  
 `sudo reboot`
-
-* Check the HSA driver installation:
-`cd HSA-Drivers-Linux-AMD; ./kfd_check_installation.sh`
 
 
 #####Obtaining kernel and libhsakmt source code

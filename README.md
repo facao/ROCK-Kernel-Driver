@@ -1,6 +1,6 @@
 ### AMD Radeon OpenCompute Kernel driver
 
-### BINARY PACKAGES FOR KERNEL AND THUNK ARE IN THE /packages DIRECTORY
+* Please see /packages directory for binary install packages
 
 ### Installation and Configuration guide
 
